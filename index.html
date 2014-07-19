@@ -1,1 +1,143 @@
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>map bounds</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
+        <link rel="stylesheet" href="styles/vendor.css">
+
+        <link rel="stylesheet" href="styles/main.css">
+
+        <style type='text/css'>
+            .container{
+                height: 600px;
+            }
+            .map-canvas {
+              width:100%;
+              height:100%;
+            }
+
+            .marker {
+              border:1px #FF00FF solid;
+              position:fixed;
+            }
+            .ne, .sw {
+                font-weight: bold;
+            }
+        </style>
+
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    </head>
+    <body>
+        <!--[if lt IE 10]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <div class="container">
+            <div class="header">
+                <ul class="nav nav-pills pull-right">
+                    <li class="active"><a href="#">Draw Bounds</a></li>
+<!--                     <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li> -->
+                </ul>
+                <h3 class="text-muted">Find Rectangular bounds</h3>
+                <div class="row">
+                    <div class="col-xs-6">North East</div>
+                    <div class="col-xs-6">South West</div>
+                </div>
+                <div class="row">
+                    <div class="ne col-xs-6">--</div>
+                    <div class="sw col-xs-6">--</div>
+                </div>
+            </div>
+
+            <div class="map-canvas"></div>
+
+
+            <div class="footer">
+                <p>♥ from the Yeoman team</p>
+            </div>
+        </div>
+
+
+        <script src="scripts/vendor.js"></script>
+
+        <script src="scripts/main.js"></script>
+        <script type="text/javascript">
+            mapOptions = {
+              center: new google.maps.LatLng(10.022905699999999, 76.3360053),
+              zoom: 12,
+              mapTypeId: google.maps.MapTypeId.ROADMAP,
+              zoomControl:true,
+              scrollwheel: false,
+              disableDoubleClickZoom: true,
+              mapTypeControl: false,
+              minZoom: 11
+              //   draggable: false
+            };
+
+            var map = new google.maps.Map($(".map-canvas")[0],mapOptions);
+            var rect = null;
+
+            var latlng = [];
+            var x1,x2,y1,y2;
+
+            google.maps.event.addListener(map, 'mousedown', function(evt) {
+              console.log('mousedown');
+              latlng = [];
+              latlng.push(evt.latLng);
+            });
+
+            google.maps.event.addListener(map, 'mouseup', function(evt) {
+              console.log('mouseup');
+              latlng.push(evt.latLng);
+              if(evt.latLng.lat() != latlng[0].lat()){
+                DrawRect();
+              }
+              latlng = [];
+            });
+
+            function DrawRect() {
+              bounds = new google.maps.LatLngBounds(
+                latlng[0],
+                latlng[1]
+              );
+              rect = new google.maps.Rectangle({
+                map: map,
+                bounds: bounds,
+                strokeColor: '#000',
+                visible: true,
+                fillColor: 'red',
+                editable: true
+              });
+              google.maps.event.addListener(rect, 'bounds_changed', writeBounds );
+              writeBounds();
+            }
+
+            function writeBounds(){
+              var ne = rect.getBounds().getNorthEast();
+              var sw = rect.getBounds().getSouthWest();
+              console.log("NorthEast : " + ne.lat() + ", " + ne.lng());
+              console.log("SouthWest : " + sw.lat() + ", " + sw.lng());
+              $('.ne').html(ne.lat() + ", " + ne.lng())
+              $('.sw').html(sw.lat() + ", " + sw.lng())
+            }
+
+            $(document).ready(function() {
+              $('li.active > a').on('click', function(){
+                if($(this).text() == 'Draw Bounds') {
+                  map.setOptions({draggable: false});
+                  $(this).text('Stop');
+                }
+                else {
+                  map.setOptions({draggable: true});
+                  $(this).text('Draw Bounds');
+                }
+              });
+            });
+        </script>
+</body>
+</html>
