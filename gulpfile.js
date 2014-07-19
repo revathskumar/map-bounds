@@ -17,6 +17,13 @@ gulp.task('styles', function () {
         .pipe($.size());
 });
 
+gulp.task('un',function(){
+    return gulp.src('dist/styles/main.css')
+        .pipe($.uncss({html: ['dist/index.html']}))
+        .pipe($.rename('main.uncss.css'))
+        .pipe(gulp.dest('dist/styles/'));
+});
+
 gulp.task('scripts', function () {
     return gulp.src('app/scripts/**/*.js')
         .pipe($.jshint())
